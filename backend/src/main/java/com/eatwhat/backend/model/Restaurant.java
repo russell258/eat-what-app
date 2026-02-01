@@ -2,7 +2,6 @@ package com.eatwhat.backend.model;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.NotFound;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
