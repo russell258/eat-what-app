@@ -34,7 +34,7 @@ public class UserController {
     public ResponseEntity<?> checkUserExists(@PathVariable String username) {
         try {
             boolean exists = userSvc.userExists(username);
-            return ResponseEntity.ok(new UserExistenceResponse(username, exists));
+            return ResponseEntity.ok(new UserExistsResponse(username, exists));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error checking user existence: " + e.getMessage());
         }
