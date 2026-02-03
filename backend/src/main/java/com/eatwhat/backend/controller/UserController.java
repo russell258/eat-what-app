@@ -1,5 +1,7 @@
 package com.eatwhat.backend.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,15 +11,25 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eatwhat.backend.model.User;
+import com.eatwhat.backend.repository.UserRepository;
 import com.eatwhat.backend.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "https://localhost:3000") // for react frontend
 public class UserController {
     
     @Autowired
     private UserService userSvc;
+
+    @Autowired
+    private UserRepository userRepo;
+
+    @GetMapping("")
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
 
     @GetMapping("/validate/{username}")
     public ResponseEntity<?> validateUser(@PathVariable String username) {
