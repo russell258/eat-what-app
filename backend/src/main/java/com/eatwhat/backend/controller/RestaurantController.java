@@ -19,7 +19,7 @@ import com.eatwhat.backend.service.RestaurantService;
 
 @RestController
 @RequestMapping("/api/sessions/{sessionCode}/restaurants")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "https://localhost:3000") // for react frontend
 public class RestaurantController {
     
     @Autowired

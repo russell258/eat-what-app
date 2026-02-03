@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sessions")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "https://localhost:3000") // for react frontend
 public class SessionController {
 
     @Autowired

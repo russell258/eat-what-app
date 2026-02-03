@@ -1,0 +1,51 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - 8080:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/eatwhatdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: eatwhat
+      SPRING_DATASOURCE_PASSWORD: example
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    secrets:
+      - db-password
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - 3000:80
+    depends_on:
+      - backend
+
+  db:
+    image: mysql:8.0
+    container_name: eatwhat-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db-password
+      MYSQL_DATABASE: eatwhatdb
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./backend/db/init:/docker-entrypoint-initdb.d:ro 
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
+
+secrets:
+  db-password:
+    file: ./backend/db/password.txt
