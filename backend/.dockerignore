@@ -29,6 +29,8 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/vendor
+**/key.pem
+**/cert.pem
 LICENSE
 README.md
 **/*.class

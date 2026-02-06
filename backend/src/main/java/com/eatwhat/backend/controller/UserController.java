@@ -17,7 +17,7 @@ import com.eatwhat.backend.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "https://localhost:3000") // for react frontend
+@CrossOrigin(origins = "http://localhost:3000") // for react frontend
 public class UserController {
     
     @Autowired
