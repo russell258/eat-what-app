@@ -4,6 +4,7 @@ import { Card, Form, Button, Alert, Container, Row, Col, ListGroup, Badge, Spinn
 import { restaurantAPI, sessionAPI, userAPI, handleApiError } from '../services/api';
 
 const SessionPage = () => {
+    
     const { sessionCode } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -26,11 +27,13 @@ const SessionPage = () => {
     const [canRequestRandom, setCanRequestRandom] = useState(false);
 
     useEffect(() => {
+        console.log('[SessionPage] useEffect triggered');
         // Get username from URL params
         const params = new URLSearchParams(location.search);
         const user = params.get('user');
         if (user) {
             setUsername(user);
+            console.log(`[SessionPage] Username from URL: ${user}`);
         }
         
         // Fetch initial data
@@ -44,15 +47,18 @@ const SessionPage = () => {
     }, [sessionCode, location.search]);
 
     const fetchSessionData = async () => {
+        console.log(`[SessionPage] Fetching session data for: ${sessionCode}`);
         setLoading({...loading, fetch: true});
         try {
             // Get session info
             const sessionResponse = await sessionAPI.getSession(sessionCode);
-            setSessionInfo(sessionResponse.data);
+            setSessionInfo(sessionResponse.data.data);
+            console.log('[SessionPage] Session info loaded:', sessionResponse.data.data);
             
             // Get restaurants
             const restaurantsResponse = await restaurantAPI.getRestaurants(sessionCode);
-            setRestaurants(restaurantsResponse.data);
+            setRestaurants(restaurantsResponse.data.data);
+            console.log(`[SessionPage] Restaurants loaded: ${restaurantsResponse.data.data.length}`);
         } catch (error) {
             showAlert('error', handleApiError(error));
         } finally {
@@ -61,26 +67,33 @@ const SessionPage = () => {
     };
 
     const checkSessionStatus = async () => {
+        console.log(`[SessionPage] Checking session status: ${sessionCode}`);
         try {
             const response = await sessionAPI.getSession(sessionCode);
             // Check if session is locked by checking if random restaurant has been selected
-            setIsLocked(response.data.locked || false);
+            const locked = response.data.data.locked || false;
+            setIsLocked(locked);
+            console.log(`[SessionPage] Session locked status: ${locked}`);
         } catch (error) {
-            console.error('Error checking session status:', error);
+            console.error('[SessionPage] Error checking session status:', error);
         }
     };
 
     const checkCanRequestRandom = async (user) => {
+        console.log(`[SessionPage] Checking random request permission: ${sessionCode}, user: ${user}`);
         if (!user) return;
         try {
             const response = await restaurantAPI.canRequestRandom(sessionCode, user);
-            setCanRequestRandom(response.data.canRequest);
+            const canRequest = response.data.data.canRequest;
+            setCanRequestRandom(canRequest);
+            console.log(`[SessionPage] Can request random: ${canRequest}`);
         } catch (error) {
-            console.error('Error checking random request permission:', error);
+            console.error('[SessionPage] Error checking random request permission:', error);
         }
     };
 
     const showAlert = (type, message) => {
+        console.log(`[SessionPage] Showing ${type} alert: ${message}`);
         setAlerts({...alerts, [type]: message});
         setTimeout(() => {
             setAlerts({...alerts, [type]: ''});
@@ -88,6 +101,7 @@ const SessionPage = () => {
     };
 
     const handleSubmitRestaurant = async (e) => {
+        console.log('[SessionPage] Submitting restaurant');
         e.preventDefault();
         
         if (!restaurantName.trim()) {
@@ -95,16 +109,12 @@ const SessionPage = () => {
             return;
         }
 
-        if (isLocked) {
-            showAlert('error', 'Session is locked. No more restaurants can be submitted.');
-            return;
-        }
-
         setLoading({...loading, submit: true});
         
         try {
+            // Backend handles validation (session locked, user permissions, etc.)
             const response = await restaurantAPI.submitRestaurant(sessionCode, restaurantName, username);
-            setRestaurants([...restaurants, response.data]);
+            setRestaurants([...restaurants, response.data.data]);
             setRestaurantName('');
             showAlert('success', 'Restaurant submitted successfully!');
         } catch (error) {
@@ -115,16 +125,13 @@ const SessionPage = () => {
     };
 
     const handleGetRandomRestaurant = async () => {
-        if (!canRequestRandom) {
-            showAlert('error', 'Only the first person to submit a restaurant can request a random choice.');
-            return;
-        }
-
+        console.log('[SessionPage] Getting random restaurant');
         setLoading({...loading, random: true});
         
         try {
+            // Backend handles all validation now (first submitter check, session state, etc.)
             const response = await restaurantAPI.getRandomRestaurant(sessionCode);
-            setRandomRestaurant(response.data);
+            setRandomRestaurant(response.data.data);
             setIsLocked(true);
             showAlert('success', 'Random restaurant selected!');
         } catch (error) {
@@ -141,6 +148,7 @@ const SessionPage = () => {
     };
 
     const handleBackToLanding = () => {
+        console.log('[SessionPage] Navigating back to landing page');
         navigate('/');
     };
 
@@ -195,43 +203,41 @@ const SessionPage = () => {
                             )}
 
                             {/* Restaurant Submission Form */}
-                            {!isLocked && (
-                                <Card className="mb-4">
-                                    <Card.Body>
-                                        <Card.Title>Submit Restaurant</Card.Title>
-                                        <Form onSubmit={handleSubmitRestaurant}>
-                                            <Row>
-                                                <Col md={8}>
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Label>Restaurant Name</Form.Label>
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Enter restaurant name"
-                                                            value={restaurantName}
-                                                            onChange={(e) => setRestaurantName(e.target.value)}
-                                                            onKeyPress={(e) => handleKeyPress(e, handleSubmitRestaurant)}
-                                                            disabled={loading.submit}
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col md={4}>
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Label>&nbsp;</Form.Label>
-                                                        <Button 
-                                                            variant="primary" 
-                                                            type="submit"
-                                                            disabled={loading.submit}
-                                                            className="w-100"
-                                                        >
-                                                            {loading.submit ? 'Submitting...' : 'Submit Restaurant'}
-                                                        </Button>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                        </Form>
-                                    </Card.Body>
-                                </Card>
-                            )}
+                            <Card className="mb-4">
+                                <Card.Body>
+                                    <Card.Title>Submit Restaurant</Card.Title>
+                                    <Form onSubmit={handleSubmitRestaurant}>
+                                        <Row>
+                                            <Col md={8}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>Restaurant Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Enter restaurant name"
+                                                        value={restaurantName}
+                                                        onChange={(e) => setRestaurantName(e.target.value)}
+                                                        onKeyPress={(e) => handleKeyPress(e, handleSubmitRestaurant)}
+                                                        disabled={loading.submit || isLocked}
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={4}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>&nbsp;</Form.Label>
+                                                    <Button 
+                                                        variant="primary" 
+                                                        type="submit"
+                                                        disabled={loading.submit || isLocked}
+                                                        className="w-100"
+                                                    >
+                                                        {loading.submit ? 'Submitting...' : 'Submit Restaurant'}
+                                                    </Button>
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                    </Form>
+                                </Card.Body>
+                            </Card>
 
                             {/* Restaurant List */}
                             <Card>
@@ -269,36 +275,34 @@ const SessionPage = () => {
                             </Card>
 
                             {/* Random Selection Button */}
-                            {!isLocked && restaurants.length > 0 && (
-                                <div className="text-center mt-4">
-                                    <Button 
-                                        variant="danger" 
-                                        size="lg"
-                                        onClick={handleGetRandomRestaurant}
-                                        disabled={loading.random}
-                                    >
-                                        {loading.random ? (
-                                            <>
-                                                <Spinner
-                                                    as="span"
-                                                    animation="border"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                />
-                                                {' '} Selecting...
-                                            </>
-                                        ) : (
-                                            'Get Random Restaurant'
-                                        )}
-                                    </Button>
-                                    {!canRequestRandom && (
-                                        <div className="text-muted mt-2">
-                                            Note: Only the first person to submit a restaurant can request a random choice.
-                                        </div>
+                            <div className="text-center mt-4">
+                                <Button 
+                                    variant="danger" 
+                                    size="lg"
+                                    onClick={handleGetRandomRestaurant}
+                                    disabled={loading.random || isLocked || restaurants.length === 0}
+                                >
+                                    {loading.random ? (
+                                        <>
+                                            <Spinner
+                                                as="span"
+                                                animation="border"
+                                                size="sm"
+                                                role="status"
+                                                aria-hidden="true"
+                                            />
+                                            {' '} Selecting...
+                                        </>
+                                    ) : (
+                                        'Get Random Restaurant'
                                     )}
-                                </div>
-                            )}
+                                </Button>
+                                {!canRequestRandom && restaurants.length > 0 && (
+                                    <div className="text-muted mt-2">
+                                        Note: Only the first person to submit a restaurant can request a random choice.
+                                    </div>
+                                )}
+                            </div>
                         </Card.Body>
                     </Card>
                 </Col>

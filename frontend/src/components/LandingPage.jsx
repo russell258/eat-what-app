@@ -34,6 +34,7 @@ const LandingPage = () => {
     };
 
     const createSession = async () => {
+        console.log('[LandingPage] Creating session');
         const {initiatorUsername} = formData;
 
         if (!initiatorUsername.trim()) {
@@ -44,17 +45,9 @@ const LandingPage = () => {
         setLoading({...loading, create: true});
 
         try {
-            // Validate user existence
-            const userValidation = await userAPI.validateUser(initiatorUsername);
-
-            if (!userValidation.data.exists) {
-                showAlert('error', 'User not found. Please contact administrator.');
-                return;
-            }
-
-            // Create session
+            // Backend handles all validation now
             const response = await sessionAPI.createSession(initiatorUsername);
-            const sessionCode = response.data.sessionCode;
+            const sessionCode = response.data.data.sessionCode;
 
             showAlert('success', 'Session created successfully!');
 
@@ -62,14 +55,15 @@ const LandingPage = () => {
             setTimeout(() => {
                 navigate(`/session/${sessionCode}?user=${encodeURIComponent(initiatorUsername)}`);
             }, 1000);
-            } catch (error) {
-                showAlert('error', handleApiError(error));
-            } finally {
-                setLoading({...loading, create: false});
+        } catch (error) {
+            showAlert('error', handleApiError(error));
+        } finally {
+            setLoading({...loading, create: false});
         }
     };
 
     const joinSession = async () => {
+        console.log('[LandingPage] Joining session');
         const {joinSessionCode, joinUsername} = formData;
 
         if (!joinSessionCode.trim() || !joinUsername.trim()) {
@@ -80,7 +74,7 @@ const LandingPage = () => {
         setLoading({...loading, join: true});
 
         try {
-            // check session existence with uppercase
+            // Backend handles session validation now
             await sessionAPI.getSession(joinSessionCode.toUpperCase());
 
             showAlert('success', 'Joined session successfully');
