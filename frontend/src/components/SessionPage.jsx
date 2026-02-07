@@ -116,6 +116,7 @@ const SessionPage = () => {
             const response = await restaurantAPI.submitRestaurant(sessionCode, restaurantName, username);
             setRestaurants([...restaurants, response.data.data]);
             setRestaurantName('');
+            checkCanRequestRandom(username);
             showAlert('success', 'Restaurant submitted successfully!');
         } catch (error) {
             showAlert('error', handleApiError(error));
@@ -195,7 +196,7 @@ const SessionPage = () => {
                             {randomRestaurant && (
                                 <Card className="bg-success text-white mb-4">
                                     <Card.Body>
-                                        <Card.Title>🎉 Your Random Choice!</Card.Title>
+                                        <Card.Title>Your random choice is.... </Card.Title>
                                         <h2>{randomRestaurant.restaurantName}</h2>
                                         <p className="mb-0">Submitted by: {randomRestaurant.submittedBy}</p>
                                     </Card.Body>
@@ -280,7 +281,7 @@ const SessionPage = () => {
                                     variant="danger" 
                                     size="lg"
                                     onClick={handleGetRandomRestaurant}
-                                    disabled={loading.random || isLocked || restaurants.length === 0}
+                                    disabled={loading.random || isLocked || restaurants.length === 0 || !canRequestRandom}
                                 >
                                     {loading.random ? (
                                         <>

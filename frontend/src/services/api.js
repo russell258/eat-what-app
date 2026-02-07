@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for the backend API
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -11,11 +11,52 @@ const apiClient = axios.create({
     },
 });
 
-// Response interceptor to handle errors
-apiClient.interceptors.response.use(
-    (response) => response,
+// Request interceptor for logging
+apiClient.interceptors.request.use(
+    (config) => {
+        console.log(`[API] ${config.method.toUpperCase()} ${config.url}`, {
+            data: config.data,
+            params: config.params
+        });
+        return config;
+    },
     (error) => {
-        console.error('API Error:', error);
+        console.error('[API] Request error:', error);
+        return Promise.reject(error);
+    }
+);
+
+// Response interceptor to handle standardized responses and errors
+apiClient.interceptors.response.use(
+    (response) => {
+        console.log(`[API] ${response.config.method.toUpperCase()} ${response.config.url} - Success`, {
+            status: response.status,
+            data: response.data
+        });
+        
+        // Handle standardized API responses
+        if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+            if (response.data.success) {
+                return response;
+            } else {
+                const error = new Error(response.data.message || 'Request failed');
+                error.response = {
+                    ...response,
+                    data: response.data
+                };
+                console.error(`[API] Business error: ${response.data.message}`);
+                return Promise.reject(error);
+            }
+        }
+        
+        return response;
+    },
+    (error) => {
+        console.error(`[API] ${error.config?.method?.toUpperCase()} ${error.config?.url} - Error:`, {
+            status: error.response?.status,
+            message: error.response?.data?.message || error.message,
+            details: error.response?.data
+        });
         return Promise.reject(error);
     }
 );
@@ -61,22 +102,30 @@ export const restaurantAPI = {
 
 // Utility function to handle API errors
 export const handleApiError = (error) => {
+    console.log('[handleApiError] Processing error:', error);
+    
     if (error.response) {
         // Server responded with error status
         const status = error.response.status;
-        const message = error.response.data;
+        const data = error.response.data;
         
+        // Handle standardized API responses
+        if (data && typeof data === 'object' && 'message' in data) {
+            return data.message;
+        }
+        
+        // Handle traditional error responses
         switch (status) {
             case 400:
-                return typeof message === 'string' ? message : 'Bad request. Please check your input.';
+                return typeof data === 'string' ? data : 'Bad request. Please check your input.';
             case 404:
                 return 'Resource not found.';
             case 409:
-                return typeof message === 'string' ? message : 'Conflict occurred.';
+                return typeof data === 'string' ? data : 'Conflict occurred.';
             case 500:
                 return 'Server error. Please try again later.';
             default:
-                return typeof message === 'string' ? message : `Error (${status}): ${error.message}`;
+                return typeof data === 'string' ? data : `Error (${status}): ${error.message}`;
         }
     } else if (error.request) {
         // Network error
