@@ -128,6 +128,29 @@ public class RestaurantController {
             }
     }
 
+    @PostMapping("/{restaurantId}/delete")
+    public ResponseEntity<ApiResponse<String>> deleteRestaurant(
+        @PathVariable String sessionCode, 
+        @PathVariable Long restaurantId, 
+        @RequestBody DeleteRestaurantRequest request) {
+            logger.info("Deleting restaurant: sessionCode={}, restaurantId={}, username={}", 
+                       sessionCode, restaurantId, request.getUsername());
+            try{
+                restaurantSvc.deleteRestaurant(restaurantId, request.getUsername());
+                logger.info("Restaurant deleted successfully: restaurantId={}", restaurantId);
+                return ResponseEntity.ok(ApiResponse.success("Restaurant deleted successfully"));
+            } catch (IllegalArgumentException e) {
+                logger.warn("Invalid restaurant deletion: sessionCode={}, restaurantId={}, username={}, error={}", 
+                           sessionCode, restaurantId, request.getUsername(), e.getMessage());
+                return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage(), 400));
+            } catch (Exception e) {
+                logger.error("Error deleting restaurant: sessionCode={}, restaurantId={}", 
+                            sessionCode, restaurantId, e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Error deleting restaurant: " + e.getMessage(), 500));
+            }
+    }
+
     public static class RestaurantCountResponse {
         private long count;
 
@@ -157,6 +180,24 @@ public class RestaurantController {
 
         public void setCanRequest(boolean canRequest) {
             this.canRequest = canRequest;
+        }
+    }
+
+    public static class DeleteRestaurantRequest {
+        private String username;
+
+        public DeleteRestaurantRequest() {}
+
+        public DeleteRestaurantRequest(String username) {
+            this.username = username;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
         }
     }
 

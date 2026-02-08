@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eatwhat.backend.model.Restaurant;
 import com.eatwhat.backend.model.Session;
 import com.eatwhat.backend.model.User;
 import com.eatwhat.backend.repository.SessionRepository;
@@ -51,6 +52,22 @@ public class SessionService {
         }
 
         session.lockSession();
+        return sessionRepo.save(session);
+    }
+
+    public Session lockSession(String sessionCode, Restaurant randomRestaurant) {
+        Optional<Session> sessionOpt = sessionRepo.findBySessionCode(sessionCode);
+        if (sessionOpt.isEmpty()) {
+            throw new IllegalArgumentException("Session not found: " + sessionCode);
+        }
+
+        Session session = sessionOpt.get();
+
+        if (session.isLocked()) {
+            throw new IllegalStateException("Session is already locked: " + sessionCode);
+        }
+
+        session.lockSession(randomRestaurant);
         return sessionRepo.save(session);
     }
 

@@ -50,8 +50,12 @@ public class Session {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "locked _at")
+    @Column(name = "locked_at")
     private LocalDateTime lockedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "random_restaurant_id")
+    private Restaurant randomRestaurant;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Restaurant> restaurants = new ArrayList<>();
@@ -71,6 +75,13 @@ public class Session {
     public void lockSession() {
         this.status = SessionStatus.LOCKED;
         this.lockedAt = LocalDateTime.now();
+    }
+
+    // lock session with random restaurant
+    public void lockSession(Restaurant randomRestaurant) {
+        this.status = SessionStatus.LOCKED;
+        this.lockedAt = LocalDateTime.now();
+        this.randomRestaurant = randomRestaurant;
     }
 
     // check if locked

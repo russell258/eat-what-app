@@ -98,6 +98,11 @@ export const restaurantAPI = {
     
     canRequestRandom: (sessionCode, username) => 
         apiClient.get(`/sessions/${encodeURIComponent(sessionCode)}/restaurants/can-request-random/${encodeURIComponent(username)}`),
+    
+    deleteRestaurant: (sessionCode, restaurantId, username) => 
+        apiClient.post(`/sessions/${encodeURIComponent(sessionCode)}/restaurants/${restaurantId}/delete`, {
+            username
+        }),
 };
 
 // Utility function to handle API errors

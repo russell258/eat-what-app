@@ -90,11 +90,6 @@ const LandingPage = () => {
         }
     };
 
-    const handleKeyPress = (event,action) => {
-        if (event.key ==='Enter') {
-            action();
-        }
-    };
 
     return (
         <div className="container mt-5">
@@ -103,7 +98,7 @@ const LandingPage = () => {
                     <Card className="shadow">
                         <Card.Body>
                             <Card.Title className="text-center mb-4">
-                                <h3>Get Started</h3>
+                                <h3>Eat what?</h3>
                             </Card.Title>
                             
                             {alerts.error && (
@@ -123,21 +118,21 @@ const LandingPage = () => {
                                     <Card>
                                         <Card.Body>
                                             <Card.Title>Create New Session</Card.Title>
-                                            <Form>
+                                            <Form onSubmit={(e) => { e.preventDefault(); createSession(); }}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Your Username</Form.Label>
+                                                    <Form.Label>Username:</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         placeholder="Enter your username"
                                                         value={formData.initiatorUsername}
                                                         onChange={(e) => handleInputChange('initiatorUsername', e.target.value)}
-                                                        onKeyPress={(e) => handleKeyPress(e, createSession)}
                                                         disabled={loading.create}
+                                                        className="form-control-lg"
                                                     />
                                                 </Form.Group>
                                                 <Button 
                                                     variant="primary" 
-                                                    onClick={createSession}
+                                                    type="submit"
                                                     disabled={loading.create}
                                                     className="w-100"
                                                 >
@@ -152,32 +147,32 @@ const LandingPage = () => {
                                     <Card>
                                         <Card.Body>
                                             <Card.Title>Join Existing Session</Card.Title>
-                                            <Form>
+                                            <Form onSubmit={(e) => { e.preventDefault(); joinSession(); }}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Session Code</Form.Label>
+                                                    <Form.Label>Session Code:</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         placeholder="Enter session code"
                                                         value={formData.joinSessionCode}
                                                         onChange={(e) => handleInputChange('joinSessionCode', e.target.value)}
-                                                        onKeyPress={(e) => handleKeyPress(e, joinSession)}
                                                         disabled={loading.join}
+                                                        className="form-control-lg"
                                                     />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Your Username</Form.Label>
+                                                    <Form.Label>Username:</Form.Label>
                                                     <Form.Control
                                                         type="text"
-                                                        placeholder="Enter your username"
+                                                        placeholder="Enter username"
                                                         value={formData.joinUsername}
                                                         onChange={(e) => handleInputChange('joinUsername', e.target.value)}
-                                                        onKeyPress={(e) => handleKeyPress(e, joinSession)}
                                                         disabled={loading.join}
+                                                        className="form-control-lg"
                                                     />
                                                 </Form.Group>
                                                 <Button 
                                                     variant="success" 
-                                                    onClick={joinSession}
+                                                    type="submit"
                                                     disabled={loading.join}
                                                     className="w-100"
                                                 >

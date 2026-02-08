@@ -59,12 +59,14 @@ public class RestaurantService {
             throw new IllegalStateException("No restaurants available in session: " + sessionCode);
         }
 
-        // Locl session after getting random restaurant
-        sessionSvc.lockSession(sessionCode);
-
-        // return random restaurant
+        // Select random restaurant
         int randomIndex = random.nextInt(restaurants.size());
-        return restaurants.get(randomIndex);
+        Restaurant randomRestaurant = restaurants.get(randomIndex);
+        
+        // Lock session with the selected random restaurant
+        sessionSvc.lockSession(sessionCode, randomRestaurant);
+
+        return randomRestaurant;
     }
 
     public long getRestaurantCount(String sessionCode) {
@@ -88,6 +90,27 @@ public class RestaurantService {
     public boolean canRequestRandom(String sessionCode, String username) {
         String firstSubmitter = getFirstSubmitter(sessionCode);
         return firstSubmitter != null && firstSubmitter.equals(username);
+    }
+
+    public void deleteRestaurant(Long restaurantId, String username) {
+        Optional<Restaurant> restaurantOpt = restaurantRepo.findById(restaurantId);
+        if (restaurantOpt.isEmpty()) {
+            throw new IllegalArgumentException("Restaurant not found: " + restaurantId);
+        }
+
+        Restaurant restaurant = restaurantOpt.get();
+        
+        // Check if session is locked
+        if (restaurant.getSession().isLocked()) {
+            throw new IllegalStateException("Cannot delete restaurants from locked session");
+        }
+
+        // Check if user is the submitter
+        if (!restaurant.getSubmittedBy().equals(username)) {
+            throw new IllegalArgumentException("Only the submitter can delete this restaurant");
+        }
+
+        restaurantRepo.delete(restaurant);
     }
 
 }
