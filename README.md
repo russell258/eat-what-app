@@ -9,7 +9,7 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -node
 4. Run this command:
 docker compose up -d --build
 5. Go to http://localhost:3000
-
+6. Refer to API.md for API endpoints
 
 ## Existing usernames to try
 SESSION_INITIATOR: ruschin.chin
