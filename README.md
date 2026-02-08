@@ -25,45 +25,10 @@ GUEST: tester
 `Batch Processing`: Spring Batch
 
 ## DATABASE
-+---------------------+
-| Tables_in_eatwhatdb |
-+---------------------+
-| restaurants         |
-| sessions            |
-| users               |
-+---------------------+
+<img width="127" height="105" alt="image" src="https://github.com/user-attachments/assets/3817911a-98df-4ef5-8fe3-89c700a12af4" />
 
-+-------------+----------------------+-----------+-------------+----------------+----------------+
-| TABLE_NAME  | COLUMN_NAME          | DATA_TYPE | IS_NULLABLE | COLUMN_DEFAULT | COLUMN_COMMENT |
-+-------------+----------------------+-----------+-------------+----------------+----------------+
-| restaurants | id                   | bigint    | NO          | NULL           |                |
-| restaurants | submitted_at         | datetime  | NO          | NULL           |                |
-| restaurants | submitted_by         | varchar   | NO          | NULL           |                |
-| restaurants | session_id           | bigint    | NO          | NULL           |                |
-| restaurants | restaurant_name      | varchar   | NO          | NULL           |                |
-| sessions    | id                   | bigint    | NO          | NULL           |                |
-| sessions    | created_at           | datetime  | NO          | NULL           |                |
-| sessions    | locked _at           | datetime  | YES         | NULL           |                |
-| sessions    | session_code         | varchar   | NO          | NULL           |                |
-| sessions    | status               | enum      | NO          | NULL           |                |
-| sessions    | initiator_id         | bigint    | NO          | NULL           |                |
-| sessions    | locked_at            | datetime  | YES         | NULL           |                |
-| sessions    | random_restaurant_id | bigint    | YES         | NULL           |                |
-| users       | id                   | bigint    | NO          | NULL           |                |
-| users       | created_at           | datetime  | NO          | NULL           |                |
-| users       | email                | varchar   | NO          | NULL           |                |
-| users       | role                 | enum      | NO          | NULL           |                |
-| users       | username             | varchar   | NO          | NULL           |                |
-+-------------+----------------------+-----------+-------------+----------------+----------------+
+<img width="527" height="496" alt="image" src="https://github.com/user-attachments/assets/7687413a-42d9-4907-9644-166a5aeacbbf" />
 
-FOREIGN_KEY:
-+-------------+----------------------+-----------------------+------------------------+
-| TABLE_NAME  | COLUMN_NAME          | REFERENCED_TABLE_NAME | REFERENCED_COLUMN_NAME |
-+-------------+----------------------+-----------------------+------------------------+
-| restaurants | session_id           | sessions              | id                     |
-| sessions    | random_restaurant_id | restaurants           | id                     |
-| sessions    | initiator_id         | users                 | id                     |
-+-------------+----------------------+-----------------------+------------------------+
 
 
 ## Features:
